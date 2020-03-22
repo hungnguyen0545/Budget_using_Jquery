@@ -1,0 +1,179 @@
+*{
+    box-sizing: border-box;
+    margin : 0 ;
+    padding : 0 ;
+}
+body{
+    height: 100vh;
+    position: relative;
+    font-family: Open Sans ;
+    font-weight: 300;
+    font-size: 20px;
+}
+
+.card-container{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 45px;
+}
+.item{
+    width: 100%;
+    height: 55px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    opacity: 0.6;
+}
+.item:first-child{
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+/*
+TOP-PART
+*/
+.top{
+    height : 40vh;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)), url(landscape.jpeg);
+    background-position: center;
+    background-size: cover;
+    position: relative;
+}
+.budget{
+    position: absolute;
+    width: 350px;
+    left : 50%;
+    transform: translate(-50%,0);
+    color: #fff;
+}
+.budget-title{
+    text-align: center;
+    font-size : 21px;
+    text-transform: uppercase;
+    margin-bottom : 10px;
+}
+.budget-value{
+    margin : 10px auto;
+    font-size : 50px;
+    text-align: center;
+    letter-spacing: 2px;
+}
+.budget-inc,.budget-exp{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 7px;
+    border-radius: 3px;
+}
+.budget-inc{
+    background-color: #28B9B5;
+    margin-bottom:20px;
+}
+.budget-exp{
+    background-color: #FF5049;
+    margin-top : 10px
+}
+
+/*
+MIDDLE PART
+*/
+.middle{
+    width: 100%;
+    height: 12vh;
+    background-color: whitesmoke;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.add-container{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-type,.add-description,.add-value{
+    margin : auto 10px;
+    height: 50px;
+    border: 1px solid #e7e7e7;
+    border-radius: 5px;
+}
+.add-type{
+    width: 60px;
+    font-size: 18px;
+    color: grey;
+    transition: border 0.3s;
+    font-weight: 300;
+}
+.add-description{
+    width: 310px;
+    padding-left: 20px;
+}
+.add-value { 
+    width: 100px;
+    padding-left: 10px;
+}
+.add-btn{
+    background: none;
+    border: none;
+    font-size: 35px;
+    margin-left: 10px;
+    color: #28B9B5;
+    cursor: pointer;
+    display: inline-block;
+}
+
+/*BOTTOM PART*/
+.bottom{
+    width: 1000px;
+    height: auto;
+    margin: 60px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.inc-exp-list-display{
+    width: 95%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.inc-table,.exp-table{
+    width: 50%;
+    margin: auto 22px;
+    text-align: center;
+}
+.card{
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid rgba(0,0,0,0.3);
+    padding: 5px 25px;
+    border-radius: 20px;
+    margin-bottom  : 15px; 
+}
+.expense-item{
+    background-color: #FF5049;
+}
+.income-item{
+    background-color: #28B9B5;
+}
+.inc-title{
+    font-weight: 500;
+    color: #28B9B5;
+    margin-bottom: 20px;
+}
+.exp-title{
+    font-weight: 500;
+    color:#FF5049;
+    margin-bottom: 20px;
+}
+
+.delete-item-btn{
+    margin-left: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: black;
+    display: inline-block;
+    cursor: pointer;
+}
