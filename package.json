@@ -1,0 +1,31 @@
+{
+  "name": "budget_using_jquery",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "json:server": "json-server --watch db.json --port 4000",
+    "start": "node lowdb.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hungnguyen0545/Budget_using_Jquery.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hungnguyen0545/Budget_using_Jquery/issues"
+  },
+  "homepage": "https://github.com/hungnguyen0545/Budget_using_Jquery#readme",
+  "dependencies": {
+    "@types/jquery": "^3.3.33",
+    "json-server": "^0.16.1",
+    "lowdb": "^1.0.0",
+    "requirejs": "^2.3.6",
+    "uniqid": "^5.2.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babelify": "^10.0.0"
+  }
+}
