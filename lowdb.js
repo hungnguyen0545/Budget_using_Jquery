@@ -11,19 +11,19 @@ $(document).ready(function(){
         })
 })
     $('.btn-add').click(function(){
-        var local_inc = JSON.parse(localStorage.data).allItems['inc'];
-        for(let i = 0 ; i < local_inc.length; i++)
-        {
+        var local_inc = { "id": 1, "body": "some comment", "postId": 1 };
+        // for(let i = 0 ; i < local_inc.length; i++)
+        // {
             $.ajax({
-                url : `http://localhost:3000/income_list`,
+                url : 'http://localhost:3000/comments',
                 method : 'POST',
                 ContentType : 'application/json',
-                data : JSON.parse(localStorage.data).allItems['inc'][i] ,
+                data : local_inc,
                 success : function(){
                     alert('add data completed');
                 }
             })
-        }
+        // }
         
     })
 
