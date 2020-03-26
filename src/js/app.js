@@ -1,5 +1,6 @@
 // DATA CONTROLLER -- MODEL
-DataCtrl = (function(){
+var DataCtrl = (function(){
+    var data;
     // make object creative by class
 
     class KindofBudget{
@@ -11,33 +12,11 @@ DataCtrl = (function(){
         }
     }
 
- // create general object where store all of intances item what we need
- var data ;
- if(!("data" in localStorage))
- {
-    let data_Init = {
-        allItems : {
-            inc : [],
-            exp : []
-        },
-        total : {
-            inc : 0,
-            exp : 0 
-        },
-        budget : 0 //total.inc - total.exp
-     }
-    localStorage.setItem('data',JSON.stringify(data_Init));
-    data = JSON.parse(localStorage.data);
- }
- else data = JSON.parse(localStorage.data);
- 
-   ///
-   
-
+// get data from json-server using Ajax
  function calcTotal(type)
  {
    let sum=0;
-   data.allItems[type].forEach(item => {
+   data.type.forEach(item => {
        sum += item.value ; 
    });
    data.total[type] = sum ;
@@ -45,37 +24,34 @@ DataCtrl = (function(){
  }
 
  return {
-    getData  : function()
+ 
+    addItems : async function(type,description,value) // get those value after user input value
     {
-        return data;
-    },
-    updateData : function()
-    {
-        Local_data = JSON.stringify(data);
-        localStorage.setItem('data',Local_data);
-    },
-    addItems : function(type,description,value) // get those value after user input value
-    {
-        let newId , newItem;
-        let TypeofBudget = data.allItems[type];
+        let newId 
+        let TypeofBudget = data[type];
         // create newid for new item
         // -- newId = currentId + 1 ;
             (TypeofBudget.length > 0)
             ? newId = TypeofBudget[TypeofBudget.length-1].id  + 1
             : newId = 0 ;
         // create new instance
-            newItem = new KindofBudget(newId,description,value);
+           var  newItem = new KindofBudget(newId,description,value);
         // add new instance into data.allItems[type]
-            data.allItems[type].push(newItem);
+        await $.ajax({
+            url : `http://localhost:3000/${type}`,
+            method : 'POST',
+            ContentType : 'application/json',
+            data : newItem,
+        })
             return newItem;
     },
     delItems : function(type,id)
     {
         // get real index of item in array
-        Id_array = data.allItems[type].map( item => item.id);
+        Id_array = data[type].map( item => item.id);
         index_real = Id_array.indexOf(id);
         if(index_real !== -1)
-        data.allItems[type].splice(id,1);
+        data[type].splice(id,1);
     },
     caclBudget : function()
     {
@@ -83,29 +59,33 @@ DataCtrl = (function(){
         calcTotal('inc');
         calcTotal('exp');
         // caculate Budget
-        data.budget = data.total['inc'] - data.total['exp'];
+        data.budget['value'] = data.total['inc'] - data.total['exp'];
     },
     getBudget : function()
     {
         return {
             // return a object which store all info to display on web
-            budget : data.budget,
+            budget :  data.budget['value'],
             total_inc : data.total['inc'],
             total_exp : data.total['exp']
         }
     },
-    testing : function()
+    getDatafromServer : function(db)
     {
-        
+       data = db;
+    },
+    getData : function()
+    {
+        return data;
     }
 }
 })
 ()
 // UI CONTROLLER   -- VIEW
 
-UICtrl = (function(){
+var UICtrl = (function(){
     // create the UI_DOM object which stores all of name of class we need to use
-    UI_DOM = {
+    var UI_DOM = {
         Item_type : '.add-type',
         Item_description : '.add-description',
         Item_value : '.add-value',
@@ -122,9 +102,9 @@ UICtrl = (function(){
     function formattingNumber(number){
         return number.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')//?
     }
-    show_inc_item_html = (item) => { 
-        value = formattingNumber(item.value)
-        html = `<div class="income-item card" id="inc-${item.id}">
+    var show_inc_item_html = (item) => { 
+        let value = formattingNumber(item.value)
+        let     html = `<div class="income-item card" id="inc-${item.id}">
         <div class="item-description">${item.description}</div>
         <span class="right">
             <span class="item-value">+ ${value} đ</span>
@@ -135,9 +115,9 @@ UICtrl = (function(){
         return $(UI_DOM.inc_container).append(html);
          
      };
-    show_exp_item_html = (item) => {
-        value = formattingNumber(item.value)
-        html = `<div class="expense-item card" id="exp-${item.id}">
+    var show_exp_item_html = (item) => {
+    let value = formattingNumber(item.value)
+       let  html = `<div class="expense-item card" id="exp-${item.id}">
         <div class="item-description">${item.description}</div>
         <span class="right">
             <span class="item-value">- ${value} đ</span>
@@ -166,7 +146,7 @@ UICtrl = (function(){
         displayBudget : function(data)
         {
             $(UI_DOM.Budget).text(formattingNumber(data.budget));
-            $(UI_DOM.Total_inc).text(`+ ${formattingNumber(data.total_inc)} đ`) ;
+            $(UI_DOM.Total_inc).text(`+ ${formattingNumber(data.total_inc)} đ`);
             $(UI_DOM.Total_exp).text(`- ${formattingNumber(data.total_exp)} đ`);
         },
         clearField : function()
@@ -178,11 +158,11 @@ UICtrl = (function(){
         showlistItem : function(data)
         {
             // show income list item 
-            data.allItems['inc'].forEach((item) => {
+            data['inc'].forEach((item) => {
                 show_inc_item_html(item);
             })
             //show expense list item 
-            data.allItems['exp'].forEach((item) => {
+            data['exp'].forEach((item) => {
                 show_exp_item_html(item);
             })
         },
@@ -232,37 +212,38 @@ var Budget_Ctrl = (function(DataCtrl,UICtrl){
        //make event listener [click] into button [Del_item]
        $(UI_DOM.Container).on('click',(e) => CtrlDeleteItem(e));//??
     });
-    UpdateBudget = function()
+    var UpdateBudget = function()
     {
         //update Budget 
         DataCtrl.caclBudget();
         // display Budget after update
         UICtrl.displayBudget(DataCtrl.getBudget());
     }
-    CtrlAddItem = function()
+    var CtrlAddItem = async function()
     {
         // get input value
-        Input = UICtrl.getInput();
+        var Input = UICtrl.getInput();
         // convert Input.value  from string to Number
-        value = Number(Input.value);
+        var value = Number(Input.value);
         if(Input.description !== '' && Input.value !== '' )
         {
             // create new item 
-             DataCtrl.addItems(Input.type,Input.description,value);
+            await DataCtrl.addItems(Input.type,Input.description,value);
             // clear Field
             UICtrl.clearField();
             // update Budget
             UpdateBudget();
             // update data in local storage;
-            DataCtrl.updateData();
+            // DataCtrl.updateData();
             // display new item
-            items = DataCtrl.getData().allItems[Input.type];
-            newItem = items[items.length-1];
+            var items = await DataCtrl.getData()[`${Input.type}`];
+            var newItem = items[items.length-1];
             UICtrl.showNewItem(Input.type,newItem);
+            console.log(DataCtrl.getData())
         }
         else alert("you not fill enough !!! ");
     }
-    CtrlDeleteItem = function(event)
+    var CtrlDeleteItem = function(event)
     {
         let itemId,splitId,id;
         // get id and type of card which want to delete
@@ -271,28 +252,31 @@ var Budget_Ctrl = (function(DataCtrl,UICtrl){
         type = splitId[0];
         id = Number(splitId[1]);
         // delete item in DataCtrl
-        DataCtrl.delItems( type , id)
+        DataCtrl.delItems(type , id)
         // // delete item in UICtrl
          UICtrl.deleteItem(itemId)
         // update Budget
         UpdateBudget();
         //
-        DataCtrl.updateData();
+      
     }
     return {
-        init : function(){
+        init : async function(){
+            var db = await $.get('http://localhost:3000/db',function(data) {
+                return data;
+            });
+            DataCtrl.getDatafromServer(db);
             setupEventListener();
             UICtrl.getMonth();
-            console.log('its work');
             UICtrl.displayBudget({
-                budget : DataCtrl.getData().budget,
-                total_inc : DataCtrl.getData().total['inc'],
-                total_exp : DataCtrl.getData().total['exp']
+                budget : DataCtrl.getBudget().budget,
+                total_inc : DataCtrl.getBudget().total_inc,
+                total_exp : DataCtrl.getBudget().total_exp
             });
             
-            console.log(DataCtrl.getData());
             //display list item
-            UICtrl.showlistItem(DataCtrl.getData());
+           UICtrl.showlistItem(DataCtrl.getData());
+           console.log(DataCtrl.getData());
         }
     }
 })(DataCtrl,UICtrl)
