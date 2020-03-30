@@ -55,7 +55,7 @@
                     placeholder="Add description">
                     <input type="number" class="add-value"
                     placeholder="Value">
-                    <button class="add-btn">
+                    <button class="add-btn" type="button">
                         <i class="ion-ios-checkmark-outline"></i>
                     </button>
                 </div>
@@ -82,10 +82,133 @@
             </div>
         </div>
  </body>
-    <script
-        src="https://code.jquery.com/jquery-3.4.1.min.js"
-        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
-        crossorigin="anonymous">
+    <script  type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- <script type="text/javascript" src="../lowdb.js" ></script>  -->
+    <script>
+        $(window).on('load',async function() {
+            let budget_data = await getData();
+            $('.add-btn').on('click',async function()
+            {   
+                await add(budget_data);
+                console.log(budget_data);
+            })
+        })
     </script>
-    <script type="module" src="js/app.js" ></script> 
+     <!--GET DATA FROM JSON-SERVER-->
+     <script>      
+        async function  getData()
+        {
+            var budget_data ; 
+            await $.ajax({
+                url : 'http://localhost:3000/db',
+                method : 'GET',
+                success : function(db)
+                {
+                    budget_data = db;
+                    displayBudget(budget_data);
+                }
+            })
+            return budget_data;
+        }
+    </script>
+    <!-- DISPLAY INFORMATION ABOUT BUDGET ONTO SCREEN-->
+    <script>
+        function displayBudget(data)
+        {
+        // get budget value, inc and exp value from budget_data
+        let budget =  data.budget['value'];
+        let total_inc = data.total['inc'];
+        let total_exp = data.total['exp'];
+        //add value into class 
+        $('.budget-value').text(budget);
+        $('.budget-inc-value').text(`+ ${total_inc} đ`);
+        $('.budget-exp-value').text(`- ${total_exp} đ`);
+        }
+    </script>
+   <!-- ADD -->
+   <script>
+       async function add(data)
+       {
+           //get input value after user click add or enter
+           let type, description,value;
+            type = $('.add-type').children("option:selected").val();
+            description = $('.add-description').val();
+            value = Number($('.add-value').val());
+           //check all of field already filled
+            let newId ;
+            let TypeofBudget = data[type];
+            // create newid for new item
+            // -- newId = currentId + 1 ;
+            (TypeofBudget.length > 0)
+            ? newId = Number(TypeofBudget[TypeofBudget.length-1].id ) + 1
+            : newId = 0 ;
+            let item = {
+                'id' : newId,
+                'description' : description,
+                'value' : value
+            }
+            await $.ajax(
+            {
+                url : `http://localhost:3000/${type}`,
+                method : 'POST',
+                contentType : 'application/json',
+                data : JSON.stringify(item),
+                success : function(){
+                    console.log(' add data successful !!! ');
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                alert(errorThrown);
+                 }
+            })
+
+            // re calculate for inc,exp after insert item
+            let sum=0,total;
+            data[`${type}`].forEach( item => {
+                sum += item.value;
+            }) 
+            (type === "inc") 
+            ?
+            total = {
+             "inc": sum ,
+             "exp": data.total["exp"]
+            }
+            :
+            total = {
+                "inc": data.total["inc"],
+                "exp": sum 
+            }
+            await $.ajax({
+                url : `http://localhost:3000/total`,
+                method : 'PUT',
+                contentType : 'application/json',
+                data : JSON.stringify(total),
+                success : function()
+                {
+                    alert('update data successful');
+                },
+                error : function(errorThrown)
+                {
+                    alert(errorThrown);
+                }
+            })
+
+             // update the budget value after insert item 
+           let budget = data.total['inc'] - data.total['exp'];
+           await $.ajax({
+                url : 'http://localhost:3000/budget',
+                method : 'PUT',
+                contentType : 'application/json',
+                data : JSON.stringify(budget),
+                success : function()
+                {
+                    alert('update data successful');
+                },
+                error : function(errorThrown)
+                {
+                    alert(errorThrown);
+                }
+             })
+            return console.log('hoàn thành việc thêm dữ liệu ');
+       }
+   </script>
     </html>
